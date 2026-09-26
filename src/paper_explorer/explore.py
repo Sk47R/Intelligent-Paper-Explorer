@@ -34,7 +34,7 @@ def _local_coverage_score(
     if not vector_index.is_built:
         return -1.0
 
-    searcher = PaperSearcher(store=repository, index=vector_index, embedder=embedding_model)
+    searcher = PaperSearcher(store=repository, index=vector_index, embedding_model=embedding_model)
     results = searcher.search(query, top_k=1)
     return results[0].score if results else -1.0
 
@@ -143,7 +143,7 @@ def run_explore(
             console.print("[red]No FAISS index available; cannot run semantic/hybrid search.[/red]")
             continue
 
-        searcher = PaperSearcher(store=repository, index=vector_index, embedder=embedding_model)
+        searcher = PaperSearcher(store=repository, index=vector_index, embedding_model=embedding_model)
         hybrid_searcher = HybridSearcher(store=repository, bm25_index=bm25_index, searcher=searcher)
 
         try:
