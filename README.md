@@ -49,4 +49,4 @@ uv run -m paper_explorer explore
 
 ## Architecture
 
-![Architecture diagram](/paper_explorer/paper_explorer.png)
+![Architecture diagram](paper_explorer.png)
