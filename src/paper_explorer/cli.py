@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.table import Table
-
+from paper_explorer.explore import DEFAULT_COVERAGE_THRESHOLD, run_explore
 from paper_explorer.config import (
     DEFAULT_DB_PATH,
     DEFAULT_ID_MAP_PATH,
@@ -39,6 +39,16 @@ def _setup_logging(verbose: bool) -> None:
         handlers=[RichHandler(console=console, show_path=False)],
         force=True,
     )
+
+    for noisy_logger in (
+        "httpx",
+        "httpcore",
+        "urllib3",
+        "huggingface_hub",
+        "sentence_transformers",
+        "filelock",
+    ):
+        logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 
 
 def _load_vector_index(args: argparse.Namespace) -> VectorIndex:
@@ -88,6 +98,17 @@ def cmd_ingest(args: argparse.Namespace) -> None:
         console.print("[yellow]No embedded papers yet; index not saved.[/yellow]")
 
 
+def cmd_explore(args: argparse.Namespace) -> None:
+    run_explore(
+        db_path=args.db,
+        index_path=args.index,
+        id_map_path=args.id_map,
+        threshold=args.threshold,
+        top_k=args.top_k,
+        candidate_k=args.candidate_k,
+    )
+    
+    
 def cmd_migrate(args: argparse.Namespace) -> None:
     store = PaperStore(args.from_json)
     if len(store) == 0:
@@ -321,6 +342,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--from-date", default=None, help="Filter: published >= this ISO date")
     p_search.add_argument("--to-date", default=None, help="Filter: published <= this ISO date")
     p_search.set_defaults(func=cmd_search)
+    
+    p_explore = subparsers.add_parser(
+        "explore",
+        help="Interactive search: auto-ingests from arXiv when the local library "
+        "doesn't cover a topic yet, then searches with hybrid+rerank",
+    )
+    p_explore.add_argument("--top-k", type=int, default=10)
+    p_explore.add_argument("--candidate-k", type=int, default=50)
+    p_explore.add_argument(
+        "--threshold",
+        type=float,
+        default=DEFAULT_COVERAGE_THRESHOLD,
+        help="Minimum local semantic score (0-1) considered 'already covered'; "
+        "below this, auto-ingests 100 papers from arXiv before searching",
+    )
+    p_explore.set_defaults(func=cmd_explore)
 
     return parser
 
