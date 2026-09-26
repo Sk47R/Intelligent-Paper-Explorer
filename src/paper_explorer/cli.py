@@ -13,9 +13,11 @@ from paper_explorer.config import (
     DEFAULT_DB_PATH,
     DEFAULT_ID_MAP_PATH,
     DEFAULT_INDEX_PATH,
+    DEFAULT_PLOTS_DIR,
     DEFAULT_STORE_PATH,
     RAW_DIR,
 )
+from paper_explorer.visualize import run_visualize
 from paper_explorer.crawler.arxiv_client import ArxivAPIError, ArxivClient
 from paper_explorer.data.repository import PaperRepository
 from paper_explorer.data.storage import PaperStore
@@ -139,6 +141,18 @@ def cmd_migrate(args: argparse.Namespace) -> None:
         console.print(f"[green]Rebuilt FAISS index[/green] -> {args.index} ({len(index)} vectors)")
 
 
+def cmd_visualize(args: argparse.Namespace) -> None:
+    run_visualize(
+        db_path=args.db,
+        index_path=args.index,
+        id_map_path=args.id_map,
+        query=args.query,
+        output_dir=args.output_dir,
+        top_k=args.top_k,
+        candidate_k=args.candidate_k,
+        alpha=args.alpha,
+    )
+    
 def cmd_index_rebuild(args: argparse.Namespace) -> None:
     repository = PaperRepository(args.db)
     service = IngestionService(repository, client=ArxivClient())
@@ -342,6 +356,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--from-date", default=None, help="Filter: published >= this ISO date")
     p_search.add_argument("--to-date", default=None, help="Filter: published <= this ISO date")
     p_search.set_defaults(func=cmd_search)
+    
+    p_visualize = subparsers.add_parser(
+        "visualize",
+        help="Generate comparison plots (PNG) for a query: mode overlap and reranking impact",
+    )
+    p_visualize.add_argument("query", help="Query to visualize search behavior for")
+    p_visualize.add_argument("--top-k", type=int, default=10)
+    p_visualize.add_argument("--candidate-k", type=int, default=50)
+    p_visualize.add_argument("--alpha", type=float, default=0.5)
+    p_visualize.add_argument("--output-dir", default=str(DEFAULT_PLOTS_DIR))
+    p_visualize.set_defaults(func=cmd_visualize)
     
     p_explore = subparsers.add_parser(
         "explore",
