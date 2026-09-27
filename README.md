@@ -163,7 +163,13 @@ uv run -m paper_explorer explore --threshold 0.4 --top-k 10 --candidate-k 50
 
 - **Hybrid search**: Retrieves up to `candidate_k` candidates from both semantic and keyword search independently. Each result list is then min-max normalized to the range [0, 1]. This is necessary because BM25 scores are unbounded and cannot be directly compared with cosine similarity scores. The normalized scores are combined using:
 
-`hybrid_score = alpha * semantic_norm + (1 - alpha) * keyword_norm`
+  $$
+  \text{hybrid\_score}
+  =
+  \alpha \cdot \text{semantic\_norm}
+  +
+  (1-\alpha) \cdot \text{keyword\_norm}
+  $$
 
 - **Cross-encoder reranking**: A cross-encoder processes the query and candidate paper together, allowing the model to capture interactions between query and document tokens. This generally gives more precise relevance estimates, but running it across the entire corpus would be too expensive. The system therefore uses a retrieve-then-rerank approach. The first-stage search retrieves a smaller pool of `candidate_k` papers, and the cross-encoder (`cross-encoder/ms-marco-MiniLM-L-6-v2`) reranks only those candidates. The model runs locally, is free to use, and does not require a paid API. Since only the candidate pool is reranked, the cost of reranking remains manageable even as the overall paper library grows.
 
