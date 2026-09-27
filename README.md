@@ -37,6 +37,7 @@ uv run -m paper_explorer --help
 
 ```bash
 uv run -m paper_explorer ingest --query "transformer attention NLP" --max-results 100
+uv run -m paper_explorer index rebuild
 uv run -m paper_explorer stats
 uv run -m paper_explorer search "attention is all you need" --mode hybrid --rerank --top-k 10
 ```
@@ -50,3 +51,94 @@ uv run -m paper_explorer explore
 ## Architecture
 
 ![Architecture diagram](paper_explorer.png)
+
+## Commands
+
+All commands accept global `--db`, `--index`, and `--id-map` flags to point at a different database/index location than the defaults (`data/processed/papers.db`, `data/index/papers.faiss`, `data/index/id_map.json`). Add `-v` to any command for debug logging.
+
+### `ingest` -- fetch papers from arXiv into the local library
+
+```bash
+uv run -m paper_explorer ingest --query "transformer attention NLP" --max-results 200
+uv run -m paper_explorer ingest --query "graph neural networks" --max-results 200 --category cs.LG
+uv run -m paper_explorer ingest --query "reinforcement learning" --max-results 100 --start 100
+uv run -m paper_explorer ingest --query "diffusion models" --max-results 100 --no-raw
+```
+
+Re-running the same query is safe and cheap: unchanged papers are skipped entirely; only new or textually-changed papers are (re-)embedded.
+
+### `migrate` -- import an existing `papers.json` into SQLite
+
+```bash
+uv run -m paper_explorer migrate --from-json data/processed/papers.json
+```
+
+Only needed if you have data from an older JSON-based version of this project you want to carry forward. Safe to skip entirely on a fresh setup.
+
+### `stats` -- inspect the local library
+
+```bash
+uv run -m paper_explorer stats
+```
+
+Shows total papers, embedded/pending/stale/failed counts, the embedding model and dimension in use, detected categories, the publication date range, and how many vectors are currently indexed.
+
+### `index rebuild` -- reconstruct the FAISS index without re-embedding
+
+```bash
+uv run -m paper_explorer index rebuild
+```
+
+Rebuilds `papers.faiss`/`id_map.json` purely from vectors already stored in SQLite. Useful if the index file is deleted or corrupted. It does not involved data loss, arXiv calls, or model inference.
+
+### `reset` -- wipe everything and start over
+
+```bash
+uv run -m paper_explorer reset --yes
+```
+
+Deletes all papers, embeddings, and the FAISS index. Irreversible.
+
+### `search` -- search the local library
+
+```bash
+# Semantic (default) -- meaning-based
+uv run -m paper_explorer search "attention is all you need" --top-k 10
+uv run -m paper_explorer search "attention is all you need" --mode semantic --top-k 10
+
+# Keyword (BM25) -- exact-term based
+uv run -m paper_explorer search "LoRA fine-tuning" --mode keyword --top-k 10
+
+# Hybrid -- combines both, tunable balance
+uv run -m paper_explorer search "transformer architectures for NLP" \
+    --mode hybrid --alpha 0.7 --candidate-k 50 --top-k 10
+
+# Hybrid + cross-encoder reranking
+uv run -m paper_explorer search "transformer architectures for NLP" \
+    --mode hybrid --candidate-k 50 --top-k 10 --rerank
+
+# Metadata filters (combine with any mode)
+uv run -m paper_explorer search "transformer NLP" --category cs.CL --top-k 10
+uv run -m paper_explorer search "transformer NLP" --from-date 2022-01-01 --to-date 2023-12-31
+```
+
+`search` never contacts arXiv. It only searches papers already in the local database, and only ever embeds the query text at search time (never the corpus, which is embedded once during `ingest`).
+
+### `explore` -- interactive search with automatic ingestion
+
+```bash
+uv run -m paper_explorer explore
+```
+
+Prompts for a query in a loop. For each query:
+
+1. Runs a quick local semantic check. If the best local match scores below `--threshold` (default `0.35`) or the library is empty, then it treats the topic as not yet covered.
+2. If not covered, automatically ingests exactly 100 papers from arXiv on that query, then rebuilds the index.
+3. Searches with **hybrid + reranking** (the most accurate combination available), and displays scores on a consistent, meaningful **0.0 to 1.0 scale, where 1.0 is the strongest match**.
+4. Loops back for another query. Type `quit` to exit.
+
+```bash
+uv run -m paper_explorer explore --threshold 0.4 --top-k 10 --candidate-k 50
+```
+
+**Caveat:** the "is this topic already covered?" check is a heuristic based on the single best local semantic similarity score, not a guarantee of true topic coverage. A low score can also just mean no locally-stored paper happens to phrase things similarly, even if related work already exists. Hence, tune `--threshold` if it feels too eager or too conservative about re-ingesting.
