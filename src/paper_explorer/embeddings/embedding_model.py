@@ -19,8 +19,14 @@ class EmbeddingModel:
             self._model = SentenceTransformer(model_name)
         logger.info("Embedding model ready (dim=%d)", self.dimension)
 
+    # @property
+    # def dimension(self) -> int:
+    #     return self._model.get_sentence_embedding_dimension()
+    
     @property
     def dimension(self) -> int:
+        if hasattr(self._model, "get_embedding_dimension"):
+            return self._model.get_embedding_dimension()
         return self._model.get_sentence_embedding_dimension()
 
     def embed_texts(self, texts: list[str]) -> np.ndarray:

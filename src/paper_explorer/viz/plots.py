@@ -4,9 +4,8 @@ from pathlib import Path
 from sklearn.decomposition import PCA
 from paper_explorer.data.models import Paper
 
-
-matplotlib.use("Agg")
 import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
