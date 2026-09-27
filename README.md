@@ -124,6 +124,20 @@ uv run -m paper_explorer search "transformer NLP" --from-date 2022-01-01 --to-da
 
 `search` never contacts arXiv. It only searches papers already in the local database, and only ever embeds the query text at search time (never the corpus, which is embedded once during `ingest`).
 
+### `visualize` — generate comparison plots for a query
+
+```bash
+uv run -m paper_explorer visualize "attention is all you need" --top-k 10
+```
+
+Runs the given query through semantic, keyword, and hybrid search,
+plus hybrid+reranking, and saves two PNGs to `data/plots/`:
+
+- `mode_overlap.png` — how much the three search modes' top-K results overlap
+- `reranking_impact.png` — retrieval score vs. rerank score per candidate
+
+This is a separate command from `search`: `search` never produces plots, and `visualize` never prints a results table.
+
 ### `explore` -- interactive search with automatic ingestion
 
 ```bash
@@ -140,3 +154,62 @@ Prompts for a query in a loop. For each query:
 ```bash
 uv run -m paper_explorer explore --threshold 0.4 --top-k 10 --candidate-k 50
 ```
+
+## Search techniques explained
+
+- **Semantic search**: The query is converted into an embedding and compared with pre-computed paper embeddings using FAISS (`IndexFlatIP`). Since the vectors are normalized, the inner product corresponds to cosine similarity.
+
+- **Keyword search (BM25)**: Uses classic lexical search over each paper's title and abstract with the `rank-bm25` library. It runs entirely offline and does not require any additional downloads.
+
+- **Hybrid search**: Retrieves up to `candidate_k` candidates from both semantic and keyword search independently. Each result list is then min-max normalized to the range [0, 1]. This is necessary because BM25 scores are unbounded and cannot be directly compared with cosine similarity scores. The normalized scores are combined using:
+
+`hybrid_score = alpha * semantic_norm + (1 - alpha) * keyword_norm`
+
+- **Cross-encoder reranking**: A cross-encoder processes the query and candidate paper together, allowing the model to capture interactions between query and document tokens. This generally gives more precise relevance estimates, but running it across the entire corpus would be too expensive. The system therefore uses a retrieve-then-rerank approach. The first-stage search retrieves a smaller pool of `candidate_k` papers, and the cross-encoder (`cross-encoder/ms-marco-MiniLM-L-6-v2`) reranks only those candidates. The model runs locally, is free to use, and does not require a paid API. Since only the candidate pool is reranked, the cost of reranking remains manageable even as the overall paper library grows.
+
+## Visualizations
+
+Two visualizations are available via the `visualize` command (or directly as library functions), saved as PNG files, never displayed inline:
+
+- **`plot_reranking_impact(results, output_path)`** — scatter plot of first-stage retrieval score vs. cross-encoder rerank score for the same candidates, colored by how much each candidate's rank changed. Shows concretely whether reranking substantially reorders results or mostly agrees with first-stage retrieval, for a specific query.
+- **`plot_mode_overlap(semantic_results, keyword_results, hybrid_results, output_path)`** — bar chart of how many top-K papers are unique to each search mode versus shared across modes, demonstrating that hybrid search isn't simply duplicating semantic or keyword results.
+
+Both are demonstrated in `notebooks/example_usage.ipynb` and saved to `data/plots/`.
+
+## Testing
+
+```bash
+uv pip install -e ".[dev]"
+pytest tests/ -v
+ruff check .
+ruff format --check .
+```
+
+The test covers the main parts of the project, including the `Paper` model, JSON storage, the SQLite schema and repository, and operations such as insert, update, duplicate detection, content hashing, embedding status, metadata filtering, and transactions.
+
+It also covers incremental and resumable ingestion using mocked arXiv clients and embedding models, so the tests do not require network access or model downloads. Other areas covered include database migration, BM25 tokenization and ranking, hybrid search score normalization and candidate merging, including cases such as `alpha=0`, `alpha=1`, empty results, and `top_k` larger than the corpus.
+
+The reranker, search pipeline, visualization functions, and CLI argument parsing are also tested. All external dependencies are mocked where necessary, so the test suite never makes a real arXiv API request or downloads a real machine learning model.
+
+## Limitations
+
+- **arXiv API rate limiting**: `export.arxiv.org` enforces aggressive rate limits (HTTP 429) that can persist for hours regardless of client-side pacing, retries, or backoff. This is a known, widely reported issue in the broader developer community, not specific to this tool. `ArxivClient` retries with exponential backoff and fails cleanly with a clear error rather than hanging or crashing, but cannot bypass an upstream rate limit. If `ingest` fails repeatedly with 429 errors, wait and retry with a smaller `--max-results`.
+
+- **No continuous background ingestion:** the current system ingests papers when explicitly requested through ingest or automatically through explore when the local library does not sufficiently cover a query. A future version could introduce scheduled or event-driven ingestion when reliable upstream access is available.
+
+- **Search only covers title + abstract:** the current system searches metadata and abstracts rather than the full text of paper PDFs.
+
+## Development history
+
+This project was built iteratively across several phases, each adding a coherent capability on top of the last:
+
+1. A working semantic search engine over arXiv (crawling, embedding,
+   FAISS search).
+2. Hybrid retrieval (local BM25 keyword search, normalized score
+   combination, tunable `alpha`).
+3. Cross-encoder reranking (a second, more precise retrieval stage
+   that never scans the full corpus).
+4. Persistent, incremental, resumable ingestion (replacing JSON
+   storage with SQLite, content-hash-based change detection).
+5. An interactive auto-ingesting search command (`explore`) and
+   standalone comparison visualizations (`visualize`).
