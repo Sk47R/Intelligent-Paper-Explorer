@@ -65,7 +65,7 @@ def _print_results(display_rows: list[dict]) -> None:
     if not display_rows:
         console.print("[yellow]No results.[/yellow]")
         return
-
+    print("\n\n")
     table = Table(title="Results (0.0 = weakest match, 1.0 = strongest match)")
     table.add_column("Rank", justify="right")
     table.add_column("Score", justify="right")
