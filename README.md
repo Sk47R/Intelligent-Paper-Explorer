@@ -35,17 +35,22 @@ uv run -m paper_explorer --help
 
 ## Quickstart
 
-```bash
-uv run -m paper_explorer ingest --query "transformer attention NLP" --max-results 100
-uv run -m paper_explorer index rebuild
-uv run -m paper_explorer stats
-uv run -m paper_explorer search "attention is all you need" --mode hybrid --rerank --top-k 10
-```
-
-Or, for a fully interactive experience that auto-ingests when needed:
+Fully interactive experience:
 
 ```bash
 uv run -m paper_explorer explore
+```
+
+Or, Step by step
+
+```bash
+uv run -m paper_explorer ingest --query "3D Scene Understanding" --max-results 100
+
+# If the search/index fails, rebuild the index:
+uv run -m paper_explorer index rebuild
+
+uv run -m paper_explorer stats
+uv run -m paper_explorer search "3D Object Segmentation" --mode hybrid --rerank --top-k 10
 ```
 
 ## Architecture
