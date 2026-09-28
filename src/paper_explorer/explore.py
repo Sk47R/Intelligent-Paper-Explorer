@@ -41,8 +41,8 @@ def _local_coverage_score(
 
 def _auto_ingest(client: ArxivClient, repository: PaperRepository, embedding_model, query: str, index_path, id_map_path) -> None:
     console.print(
-        f"[yellow]Local library doesn't cover {query!r} well yet -- "
-        f"ingesting up to {AUTO_INGEST_MAX_RESULTS} papers from arXiv...[/yellow]"
+        f"[yellow]Local library doesn't cover {query!r} yet...\n"
+        f"ingesting {AUTO_INGEST_MAX_RESULTS} papers from arXiv...[/yellow]"
     )
     service = IngestionService(repository, client=client, embedding_model=embedding_model)
     try:
