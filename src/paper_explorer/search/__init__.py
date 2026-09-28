@@ -1,4 +1,4 @@
 """
-Semantic search and recommendation over embedded papers.
+Search Algorithms
 """
 
