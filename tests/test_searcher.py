@@ -1,4 +1,5 @@
 import numpy as np
+
 from paper_explorer.data.models import Paper
 from paper_explorer.data.storage import PaperStore
 from paper_explorer.embeddings.embedding_model import EmbeddingModel

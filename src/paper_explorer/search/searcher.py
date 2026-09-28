@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import logging
+
 from paper_explorer.data.storage import PaperStore
 from paper_explorer.embeddings.embedding_model import EmbeddingModel
 from paper_explorer.search.index import VectorIndex

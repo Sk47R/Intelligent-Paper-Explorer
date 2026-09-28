@@ -1,7 +1,11 @@
 from __future__ import annotations
+
+import logging
+
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.table import Table
+
 from paper_explorer.crawler.arxiv_client import ArxivAPIError, ArxivClient
 from paper_explorer.data.repository import PaperRepository
 from paper_explorer.embeddings.embedding_model import EmbeddingModel
@@ -14,7 +18,6 @@ from paper_explorer.search.pipeline import run_search
 from paper_explorer.search.reranker import CrossEncoderReranker, RerankerLoadError
 from paper_explorer.search.searcher import PaperSearcher
 
-import logging
 logger = logging.getLogger(__name__)
 console = Console()
 
@@ -23,7 +26,11 @@ AUTO_INGEST_MAX_RESULTS = 100
 
 
 def _local_coverage_score(
-    repository: PaperRepository, embedding_model: EmbeddingModel, index_path, id_map_path, query: str
+    repository: PaperRepository,
+    embedding_model: EmbeddingModel,
+    index_path,
+    id_map_path,
+    query: str
 ) -> float:
     if len(repository) == 0:
         return -1.0
@@ -39,7 +46,9 @@ def _local_coverage_score(
     return results[0].score if results else -1.0
 
 
-def _auto_ingest(client: ArxivClient, repository: PaperRepository, embedding_model, query: str, index_path, id_map_path) -> None:
+def _auto_ingest(client: ArxivClient,
+                 repository: PaperRepository, embedding_model,
+                 query: str, index_path, id_map_path) -> None:
     console.print(
         f"[yellow]Local library doesn't cover {query!r} yet...\n"
         f"ingesting {AUTO_INGEST_MAX_RESULTS} papers from arXiv...[/yellow]"
@@ -89,7 +98,10 @@ def _print_results(display_rows: list[dict]) -> None:
 
     for row in display_rows:
         r = row["result"]
-        console.print(f"\n[bold]{r.rank}. {r.paper.title}[/bold]  (score: {row['display_score']:.3f})")
+        console.print(
+        f"\n[bold]{r.rank}. {r.paper.title}[/bold]  "
+        f"(score: {row['display_score']:.3f})"
+        )
         console.print(f"   Authors: {', '.join(r.paper.authors) or 'n/a'}")
         console.print(f"   {r.paper.abstract_url}")
         console.print(f"   {r.short_abstract()}")
@@ -143,7 +155,9 @@ def run_explore(
             console.print("[red]No FAISS index available; cannot run semantic/hybrid search.[/red]")
             continue
 
-        searcher = PaperSearcher(store=repository, index=vector_index, embedding_model=embedding_model)
+        searcher = PaperSearcher(store=repository,
+                                 index=vector_index,
+                                 embedding_model=embedding_model)
         hybrid_searcher = HybridSearcher(store=repository, bm25_index=bm25_index, searcher=searcher)
 
         try:

@@ -1,4 +1,5 @@
 import numpy as np
+
 from paper_explorer.search.index import VectorIndex
 
 

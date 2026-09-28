@@ -1,8 +1,8 @@
 from __future__ import annotations
-from paper_explorer.search.results import SearchResult
 
 import math
 
+from paper_explorer.search.results import SearchResult
 
 
 def sigmoid(x: float) -> float:

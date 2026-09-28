@@ -28,7 +28,7 @@ class VectorIndex:
         self._index.add(np.ascontiguousarray(embeddings, dtype=np.float32))
         self.id_map = list(paper_ids)
         logger.info("Built FAISS index with %d vectors (dim=%d)", len(paper_ids), self.dim)
-        
+
     def __len__(self) -> int:
         return 0 if self._index is None else self._index.ntotal
 

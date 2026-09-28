@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 import logging
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
 from paper_explorer.data.models import Paper
 
 logger = logging.getLogger(__name__)
@@ -10,7 +13,9 @@ DEFAULT_MODEL_NAME = "all-MiniLM-L6-v2"
 
 
 class EmbeddingModel:
-    def __init__(self, model_name: str = DEFAULT_MODEL_NAME, model: SentenceTransformer | None = None):
+    def __init__(self,
+                 model_name: str = DEFAULT_MODEL_NAME,
+                 model: SentenceTransformer | None = None):
         self.model_name = model_name
         if model is not None:
             self._model = model
@@ -22,7 +27,7 @@ class EmbeddingModel:
     # @property
     # def dimension(self) -> int:
     #     return self._model.get_sentence_embedding_dimension()
-    
+
     @property
     def dimension(self) -> int:
         if hasattr(self._model, "get_embedding_dimension"):

@@ -1,4 +1,5 @@
 import numpy as np
+
 from paper_explorer.data.models import Paper
 from paper_explorer.embeddings.embedding_model import EmbeddingModel
 
@@ -10,7 +11,11 @@ class FakeSentenceTransformer:
     def get_sentence_embedding_dimension(self) -> int:
         return self.dim
 
-    def encode(self, texts, show_progress_bar = False, convert_to_numpy = True, normalize_embeddings = True):
+    def encode(self,
+               texts,
+               show_progress_bar = False,
+               convert_to_numpy = True,
+               normalize_embeddings = True):
         vectors = np.array([[float(len(t) % 7 + 1)] * self.dim for t in texts], dtype = np.float32)
         if normalize_embeddings:
             norms = np.linalg.norm(vectors, axis = 1, keepdims = True)

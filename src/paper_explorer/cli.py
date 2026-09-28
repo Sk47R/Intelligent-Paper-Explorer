@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.table import Table
-from paper_explorer.explore import DEFAULT_COVERAGE_THRESHOLD, run_explore
+
 from paper_explorer.config import (
     DEFAULT_DB_PATH,
     DEFAULT_ID_MAP_PATH,
@@ -17,10 +17,10 @@ from paper_explorer.config import (
     DEFAULT_STORE_PATH,
     RAW_DIR,
 )
-from paper_explorer.visualize import run_visualize
 from paper_explorer.crawler.arxiv_client import ArxivAPIError, ArxivClient
 from paper_explorer.data.repository import PaperRepository
 from paper_explorer.data.storage import PaperStore
+from paper_explorer.explore import DEFAULT_COVERAGE_THRESHOLD, run_explore
 from paper_explorer.ingestion.service import IngestionService
 from paper_explorer.search.bm25_index import BM25Index
 from paper_explorer.search.hybrid import HybridSearcher
@@ -29,6 +29,7 @@ from paper_explorer.search.pipeline import run_search
 from paper_explorer.search.reranker import CrossEncoderReranker, RerankerLoadError
 from paper_explorer.search.results import SearchResult
 from paper_explorer.search.searcher import PaperSearcher
+from paper_explorer.visualize import run_visualize
 
 console = Console()
 logger = logging.getLogger("paper_explorer")
@@ -109,8 +110,8 @@ def cmd_explore(args: argparse.Namespace) -> None:
         top_k=args.top_k,
         candidate_k=args.candidate_k,
     )
-    
-    
+
+
 def cmd_migrate(args: argparse.Namespace) -> None:
     store = PaperStore(args.from_json)
     if len(store) == 0:
@@ -152,7 +153,7 @@ def cmd_visualize(args: argparse.Namespace) -> None:
         candidate_k=args.candidate_k,
         alpha=args.alpha,
     )
-    
+
 def cmd_index_rebuild(args: argparse.Namespace) -> None:
     repository = PaperRepository(args.db)
     service = IngestionService(repository, client=ArxivClient())
@@ -356,7 +357,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--from-date", default=None, help="Filter: published >= this ISO date")
     p_search.add_argument("--to-date", default=None, help="Filter: published <= this ISO date")
     p_search.set_defaults(func=cmd_search)
-    
+
     p_visualize = subparsers.add_parser(
         "visualize",
         help="Generate comparison plots (PNG) for a query: mode overlap and reranking impact",
@@ -367,7 +368,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_visualize.add_argument("--alpha", type=float, default=0.5)
     p_visualize.add_argument("--output-dir", default=str(DEFAULT_PLOTS_DIR))
     p_visualize.set_defaults(func=cmd_visualize)
-    
+
     p_explore = subparsers.add_parser(
         "explore",
         help="Interactive search: auto-ingests from arXiv when the local library "

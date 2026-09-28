@@ -1,13 +1,17 @@
 from __future__ import annotations
+
 from collections import Counter
 from pathlib import Path
-from sklearn.decomposition import PCA
-from paper_explorer.data.models import Paper
 
 import matplotlib
+from sklearn.decomposition import PCA
+
+from paper_explorer.data.models import Paper
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 def plot_reranking_impact(results: list, output_path) -> Path:
     from paper_explorer.search.display import normalize_min_max, sigmoid

@@ -1,8 +1,11 @@
 from __future__ import annotations
-from rank_bm25 import BM25Okapi
-from paper_explorer.data.models import Paper
+
 import re
+
 import numpy as np
+from rank_bm25 import BM25Okapi
+
+from paper_explorer.data.models import Paper
 
 _TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
 

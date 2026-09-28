@@ -1,5 +1,9 @@
 from __future__ import annotations
+
+import logging
+
 from rich.console import Console
+
 from paper_explorer.data.repository import PaperRepository
 from paper_explorer.embeddings.embedding_model import EmbeddingModel
 from paper_explorer.search.bm25_index import BM25Index
@@ -10,7 +14,6 @@ from paper_explorer.search.reranker import CrossEncoderReranker, RerankerLoadErr
 from paper_explorer.search.searcher import PaperSearcher
 from paper_explorer.viz.plots import plot_mode_overlap, plot_reranking_impact
 
-import logging
 logger = logging.getLogger(__name__)
 console = Console()
 

@@ -142,7 +142,7 @@ def test_hybrid_merges_and_deduplicates_candidates_present_in_both():
     hybrid = build_hybrid_searcher(papers)
     results = hybrid.search("graph", mode="hybrid", top_k=10, candidate_k=10)
     ids = [r.paper.paper_id for r in results]
-    assert ids.count("p1") == 1  
+    assert ids.count("p1") == 1
 
 
 def test_hybrid_top_k_larger_than_corpus_returns_all_available():
