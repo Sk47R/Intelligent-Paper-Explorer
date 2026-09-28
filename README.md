@@ -108,8 +108,8 @@ Deletes all papers, embeddings, and the FAISS index. Irreversible.
 
 ```bash
 # Semantic (default) -- meaning-based
-uv run -m paper_explorer search "attention is all you need" --top-k 10
-uv run -m paper_explorer search "attention is all you need" --mode semantic --top-k 10
+uv run -m paper_explorer search "Chest X-Ray Segmentation" --top-k 10
+uv run -m paper_explorer search "3D Segmentation" --mode semantic --top-k 10
 
 # Keyword (BM25) -- exact-term based
 uv run -m paper_explorer search "LoRA fine-tuning" --mode keyword --top-k 10
@@ -132,7 +132,7 @@ uv run -m paper_explorer search "transformer NLP" --from-date 2022-01-01 --to-da
 ### `visualize` — generate comparison plots for a query
 
 ```bash
-uv run -m paper_explorer visualize "attention is all you need" --top-k 10
+uv run -m paper_explorer visualize "3D Segmentation Models" --top-k 10
 ```
 
 Runs the given query through semantic, keyword, and hybrid search,
