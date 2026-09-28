@@ -114,7 +114,7 @@ def run_explore(
         console.print(f"[red]Failed to load reranker:[/red] {exc}")
         return
 
-    console.print("[bold cyan]Paper Explorer -- interactive search[/bold cyan]")
+    console.print("[bold cyan]Paper Explorer: Interactive Search Engine[/bold cyan]")
     console.print("Type a query, or 'quit' to exit.\n")
 
     while True:
