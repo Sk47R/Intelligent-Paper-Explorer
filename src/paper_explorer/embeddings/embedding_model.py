@@ -1,12 +1,19 @@
 from __future__ import annotations
-
-import logging
-
-import numpy as np
-from sentence_transformers import SentenceTransformer
-
 from paper_explorer.data.models import Paper
+import logging
+import numpy as np
+import os
+import warnings
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
+os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
 
+warnings.filterwarnings("ignore", category=FutureWarning, module="huggingface_hub")
+warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub")
+warnings.filterwarnings("ignore", category=FutureWarning, module="sentence_transformers")
+
+from sentence_transformers import SentenceTransformer
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL_NAME = "all-MiniLM-L6-v2"
