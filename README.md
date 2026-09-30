@@ -21,7 +21,7 @@ Requires Python >= 3.10 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone https://github.com/Sk47R/Intelligent-Paper-Explorer.git
-cd paper-explorer
+cd Intelligent-Paper-Explorer
 uv pip install -e .
 ```
 
