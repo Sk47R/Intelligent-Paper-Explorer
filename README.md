@@ -63,7 +63,7 @@ uv run -m paper_explorer search "3D Object Segmentation" --mode hybrid --rerank 
 
 ## Architecture
 
-![Architecture diagram](/paper_explorer/images/paper_explorer.png)
+![Architecture diagram](/images/paper_explorer.png)
 
 ## Commands
 
@@ -172,9 +172,9 @@ Deletes all papers, embeddings, and the FAISS index. Irreversible.
 
 Sample output of CLI interface for search query: "3D Object Segmentation"
 
-![Sample Output 1](/paper_explorer/images/sample_output_1.png)
+![Sample Output 1](/images/sample_output_1.png)
 
-![Sample Output 2](/paper_explorer/images/sample_output_2.png)
+![Sample Output 2](/images/sample_output_2.png)
 
 ## Search techniques explained
 
