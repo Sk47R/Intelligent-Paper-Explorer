@@ -125,7 +125,7 @@ def run_explore(
     except RerankerLoadError as exc:
         console.print(f"[red]Failed to load reranker:[/red] {exc}")
         return
-
+    console.print("\n\n")
     console.print("[bold cyan]Paper Explorer: Interactive Search Engine[/bold cyan]")
     console.print("Type a query, or 'quit' to exit.\n")
 
