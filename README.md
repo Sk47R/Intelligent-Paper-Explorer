@@ -4,7 +4,9 @@
 
 ## Motivation
 
-Researchers and students face thousands of new papers a month. Keyword search on arXiv/Google Scholar often misses conceptually related work phrased with different terminology, while pure semantic search can under-rank exact terms, acronyms, or author names. The Intelligent Paper Explorer builds a personal, local, searchable library over any topic you choose, and lets you search it by meaning, by exact keyword, or both, with results you can re-run instantly and offline, without re-querying arXiv every time.
+Researchers and students often have to go through thousands of new papers to keep up with a research area. Traditional keyword searches on platforms like arXiv and Google Scholar can miss papers that discuss similar ideas using different terminology. On the other hand, purely semantic search may overlook exact keywords, acronyms, or author names.
+
+The Intelligent Paper Explorer addresses this by creating a personal, local, searchable library for any research topic you choose. It supports semantic search, exact keyword search, or a combination of both, helping you find papers based on both their meaning and specific terms. Once the papers are downloaded and indexed, searches can be run again instantly and offline without having to query arXiv every time.
 
 ## What it does
 
@@ -22,6 +24,12 @@ Requires Python >= 3.10 and [uv](https://docs.astral.sh/uv/).
 ```bash
 git clone https://github.com/Sk47R/Intelligent-Paper-Explorer.git
 cd Intelligent-Paper-Explorer
+
+# CREATE venv
+uv venv
+# ACTIVATE venv
+source .venv/bin/activate
+
 uv pip install -e .
 ```
 
@@ -96,14 +104,6 @@ uv run -m paper_explorer index rebuild
 
 Rebuilds `papers.faiss`/`id_map.json` purely from vectors already stored in SQLite. Useful if the index file is deleted or corrupted. It does not involved data loss, arXiv calls, or model inference.
 
-### `reset` -- wipe everything and start over
-
-```bash
-uv run -m paper_explorer reset --yes
-```
-
-Deletes all papers, embeddings, and the FAISS index. Irreversible.
-
 ### `search` -- search the local library
 
 ```bash
@@ -159,6 +159,14 @@ Prompts for a query in a loop. For each query:
 ```bash
 uv run -m paper_explorer explore --threshold 0.4 --top-k 10 --candidate-k 50
 ```
+
+### `reset` -- wipe everything and start over
+
+```bash
+uv run -m paper_explorer reset --yes
+```
+
+Deletes all papers, embeddings, and the FAISS index. Irreversible.
 
 ## Search techniques explained
 
